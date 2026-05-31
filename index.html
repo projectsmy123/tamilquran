@@ -1,82 +1,55 @@
 <!doctype html>
-<html lang="ta">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#efe6d2" />
-    <title>Tamil Qur'an Recitation Aid - Surah Al-Fatihah</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="header-copy">
-        <p class="eyebrow">Tamil Qur'an Recitation Aid</p>
-        <h1>Surah Al-Fatihah</h1>
-        <p class="subtitle">Arabic word boxes with Tamil direct recitation transliteration.</p>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tamil Qur’an Reciter</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">ق</div>
+        <div>
+          <h1>Tamil Qur’an Reciter</h1>
+          <p>Arabic → Tamil direct recitation aid</p>
+        </div>
       </div>
-      
+
+      <div class="toolbar-row">
+        <label class="select-wrap">
+          <span>Surah</span>
+          <select id="surahSelect" aria-label="Select Surah"></select>
+        </label>
+        <label class="select-wrap ayah-select-wrap">
+          <span>Ayah</span>
+          <select id="ayahSelect" aria-label="Select Ayah"></select>
+        </label>
+      </div>
+
+      <div class="toolbar-row compact-controls">
+        <button id="prevAyahBtn" class="pill-btn" type="button">‹ Prev</button>
+        <button id="playAyahBtn" class="pill-btn play" type="button">▶ Play</button>
+        <button id="stopAyahBtn" class="pill-btn stop" type="button">■ Stop</button>
+        <button id="nextAyahBtn" class="pill-btn" type="button">Next ›</button>
+      </div>
+      <div id="audioStatus" class="audio-status">Sheikh Mahmoud Khalil Al-Husary</div>
     </header>
 
-    <main class="container">
-      <section class="mobile-controls" aria-label="Reader controls">
-        <button id="decreaseFont" type="button">A−</button>
-        <button id="increaseFont" type="button">A+</button>
-        <span id="pageIndicator" class="page-indicator">1 / 7</span>
+    <main id="reader" class="reader" aria-live="polite">
+      <section class="loading-card">
+        <div class="spinner"></div>
+        <p>Loading Qur’an data…</p>
       </section>
-
-      <div id="app" class="ayah-pager" aria-label="Swipe horizontally to move between ayahs"></div>
-
-      <nav id="ayahNav" class="ayah-nav" aria-label="Ayah navigation"></nav>
     </main>
 
-    <dialog id="wordDialog" class="word-dialog">
-      <form method="dialog">
-        <button class="dialog-close" aria-label="Close">×</button>
-      </form>
-      <div id="dialogContent"></div>
-    </dialog>
+    <footer class="footer-note">
+      <p>Swipe left/right to change ayah. Tap a word box to hear that word.</p>
+      <p class="small">Arabic/word data: Quran Foundation API. Tamil translation: QuranEnc tamil_baqavi. Tamil transliteration: project-generated rule engine, with manual review still required.</p>
+    </footer>
+  </div>
 
-    <template id="ayahTemplate">
-      <article class="ayah-card">
-        <div class="ayah-heading">
-          <div>
-            <p class="ayah-label"></p>
-          </div>
-          <span class="ayah-number"></span>
-        </div>
-
-        <div class="ayah-audio-controls" aria-label="Ayah audio controls">
-          <button class="audio-button play-ayah" type="button" aria-label="Play ayah">▶ Play</button>
-          <button class="audio-button stop-ayah" type="button" aria-label="Stop ayah">■ Stop</button>
-          <span class="audio-status">Sheikh Mahmoud Khalil Al-Husary</span>
-        </div>
-
-        <div class="word-grid" aria-label="Arabic words with Tamil direct transliteration"></div>
-
-        <div class="continuous-block">
-          <div class="section-title-row">
-            <h3>Continuous Tamil transliteration</h3>
-            <button class="copy-button copy-tamil" type="button">Copy</button>
-          </div>
-          <p class="continuous-tamil"></p>
-        </div>
-
-        <div class="translation-block">
-          <div class="section-title-row">
-            <h3>Abdul Hameed Baqavi Tamil translation</h3>
-            <button class="copy-button copy-translation" type="button">Copy</button>
-          </div>
-          <p class="translation-text"></p>
-          <p class="translation-source"></p>
-        </div>
-
-        <div class="notes-block">
-          <h3>Tajweed / recitation notes</h3>
-          <ul class="notes-list"></ul>
-        </div>
-      </article>
-    </template>
-
-    <script src="app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
 </html>
