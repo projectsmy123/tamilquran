@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ta">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tamil Qur'an Recitation Aid - Surah Al-Fatihah</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Tamil Qur'an Recitation Aid</p>
+        <h1>Surah Al-Fatihah</h1>
+        <p class="subtitle">Mobile-first word boxes with Arabic/Tamil letter color mapping.</p>
+      </div>
+      <button id="themeToggle" class="header-button" type="button" aria-label="Toggle light and dark mode">☀︎ / ☾</button>
+    </header>
+
+    <main class="container">
+      <section class="notice">
+        <strong>Prototype:</strong> This page proves the word-box, letter-color, continuous-Tamil, and mobile layout system. The King Fahad Tamil translation text is intentionally left as a verified-data placeholder until the exact licensed text is supplied.
+      </section>
+
+      <section class="controls" aria-label="Display controls">
+        <label><input id="toggleTranslation" type="checkbox" checked /> Translation</label>
+        <label><input id="toggleNotes" type="checkbox" checked /> Tajweed notes</label>
+        <label><input id="compactMode" type="checkbox" /> Compact mobile boxes</label>
+      </section>
+
+      <div id="app"></div>
+    </main>
+
+    <template id="ayahTemplate">
+      <article class="ayah-card">
+        <div class="ayah-heading">
+          <div>
+            <p class="ayah-label"></p>
+            <h2 class="ayah-title"></h2>
+          </div>
+          <span class="ayah-number"></span>
+        </div>
+        <div class="word-grid" aria-label="Arabic words with Tamil direct transliteration"></div>
+        <div class="continuous-block">
+          <h3>Continuous Tamil transliteration</h3>
+          <p class="continuous-tamil"></p>
+        </div>
+        <div class="translation-block">
+          <h3>King Fahad Tamil translation</h3>
+          <p class="translation-text"></p>
+        </div>
+        <div class="notes-block">
+          <h3>Tajweed / recitation notes</h3>
+          <ul class="notes-list"></ul>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
