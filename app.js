@@ -1,6 +1,13 @@
-const STORAGE_KEY = "tamil-quran-fatiha-v2-settings";
+const STORAGE_KEY = "tamil-quran-fatiha-v4-settings";
+const AYAH_RECITER_NAME = "Sheikh Mahmoud Khalil Al-Husary";
+const AYAH_AUDIO_BASE = "https://everyayah.com/data/Husary_64kbps/";
+const WORD_AUDIO_BASE = "https://audio.qurancdn.com/wbw/";
+const TRANSLATION_SOURCE = "Source: QuranEnc.com — Tamil translation by Sheikh Abdul Hameed Baqavi, version 2021-01-07 / V1.0.1.";
 
 const settings = loadSettings();
+const recitationAudio = new Audio();
+recitationAudio.preload = "metadata";
+let activeAudioUi = { type: null, key: null, playButton: null, statusEl: null, wordBox: null };
 
 const fatiha = [
   {
@@ -61,7 +68,7 @@ const fatiha = [
       { word: 3, text: "ர்-ரஹ்மானி" },
       { word: 4, text: "ர்-ரஹீம்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:1 here.]",
+    translation: '1. அளவற்ற அருளாளனும், நிகரற்ற அன்புடையோனுமாகிய அல்லாஹ்வின் திருப்பெயரால் (ஓதுகிறேன்)',
     notes: [
       "اللَّهِ: hamzatul-wasl is not pronounced when continuing.",
       "الرَّحْمَٰنِ / الرَّحِيمِ: laam shamsiyyah merges into ر.",
@@ -123,7 +130,7 @@ const fatiha = [
       { word: 3, text: "ரப்பில்" },
       { word: 4, text: "ஆலமீன்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:2 here.]",
+    translation: '2. எல்லாப் புகழும் அல்லாஹ்வுக்கே! (அவன்தான்) அகிலத்தார் அனைவரையும் படைத்து வளர்த்து தகுந்த முறையில் பக்குவப்படுத்துபவன்.',
     notes: [
       "الْحَمْدُ: qamariyyah laam remains clear.",
       "رَبِّ: shaddah is shown by doubled Tamil sound.",
@@ -165,7 +172,7 @@ const fatiha = [
       { word: 1, text: "அர்-ரஹ்மானி" },
       { word: 2, text: "ர்-ரஹீம்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:3 here.]",
+    translation: '3. (அவன்தான்) அளவற்ற அருளாளன், நிகரற்ற அன்புடையவன்,',
     notes: [
       "Both words use laam shamsiyyah into ر.",
       "Tamil output follows connected recitation rather than raw spelling."
@@ -214,7 +221,7 @@ const fatiha = [
       { word: 2, text: "யவ்மி" },
       { word: 3, text: "த்-தீன்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:4 here.]",
+    translation: '4. தீர்ப்பு நாளின் அதிபதி(யும் அவனே).',
     notes: [
       "الدِّينِ: written laam is silent/merged because of shamsiyyah rule.",
       "Final stop represented as தீன்."
@@ -230,7 +237,7 @@ const fatiha = [
         rule: "Shaddah on yaa gives iyyaa.",
         units: [
           { ar: "إِ", ta: "இ", rule: "hamzah with kasra" },
-          { ar: "يَّ", ta: "ய்யா", rule: "yaa with shaddah + madd" },
+          { ar: "يَّا", ta: "ய்யா", rule: "yaa with shaddah + alif madd" },
           { ar: "كَ", ta: "க", rule: "kaaf with fatha" }
         ]
       },
@@ -259,7 +266,7 @@ const fatiha = [
         rule: "Repeated iyyaaka.",
         units: [
           { ar: "إِ", ta: "இ", rule: "hamzah with kasra" },
-          { ar: "يَّ", ta: "ய்யா", rule: "yaa with shaddah + madd" },
+          { ar: "يَّا", ta: "ய்யா", rule: "yaa with shaddah + alif madd" },
           { ar: "كَ", ta: "க", rule: "kaaf with fatha" }
         ]
       },
@@ -284,7 +291,7 @@ const fatiha = [
       { word: 4, text: "இய்யாக" },
       { word: 5, text: "நஸ்தஈன்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:5 here.]",
+    translation: '5. (அல்லாஹ்வே!) நாங்கள் உன்னையே வணங்குகிறோம்; உன்னிடமே உதவி தேடுகிறோம்.',
     notes: [
       "إِيَّاكَ: shaddah on ي is represented by ய்யா.",
       "ع uses ஃ marker as a temporary Tamil recitation convention."
@@ -337,7 +344,7 @@ const fatiha = [
       { word: 2, text: "ஸ்-ஸிராத" },
       { word: 3, text: "ல்-முஸ்தகீம்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:6 here.]",
+    translation: '6. நீ எங்களை நேரான வழியில் நடத்துவாயாக!',
     notes: [
       "الصِّرَاطَ: shamsiyyah merge into ص.",
       "ص and ط are heavy letters; color/tooltip should teach tafkheem.",
@@ -462,7 +469,7 @@ const fatiha = [
       { word: 8, text: "வலா" },
       { word: 9, text: "த்-தாள்லீன்" }
     ],
-    translation: "[Paste verified King Fahad Tamil translation for 1:7 here.]",
+    translation: '7. (அவ்வழி) எவர்களுக்கு நீ அருள் புரிந்தாயோ அவர்கள் (சென்ற) வழி.(உன்) கோபத்திற்குள்ளானவர்களோ வழிதவறியவர்களோ சென்ற வழியல்ல.',
     notes: [
       "أَنْعَمْتَ: noon sakinah before ع is izhaar.",
       "Several heavy letters occur: ص, ط, غ, ض.",
@@ -508,6 +515,94 @@ function makeEl(tag, className, text) {
   return el;
 }
 
+function pad3(value) {
+  return String(value).padStart(3, "0");
+}
+
+function getAyahAudioUrl(ayahNumber) {
+  return `${AYAH_AUDIO_BASE}001${pad3(ayahNumber)}.mp3`;
+}
+
+function getWordAudioUrl(ayahNumber, wordIndex) {
+  return `${WORD_AUDIO_BASE}001_${pad3(ayahNumber)}_${pad3(wordIndex)}.mp3`;
+}
+
+function clearActiveAudioUi(options = {}) {
+  const { keepStatus = false } = options;
+  if (activeAudioUi.playButton) activeAudioUi.playButton.classList.remove("is-active");
+  if (activeAudioUi.wordBox) activeAudioUi.wordBox.classList.remove("is-playing");
+  if (!keepStatus && activeAudioUi.statusEl) activeAudioUi.statusEl.textContent = AYAH_RECITER_NAME;
+  activeAudioUi = { type: null, key: null, playButton: null, statusEl: null, wordBox: null };
+}
+
+async function startAudio({ src, key, type, playButton = null, statusEl = null, wordBox = null, restart = false }) {
+  const sameAudio = activeAudioUi.key === key && recitationAudio.src === src;
+  if (!sameAudio) {
+    recitationAudio.pause();
+    recitationAudio.src = src;
+    restart = true;
+  }
+
+  clearActiveAudioUi({ keepStatus: sameAudio });
+  activeAudioUi = { type, key, playButton, statusEl, wordBox };
+
+  if (playButton) playButton.classList.add("is-active");
+  if (wordBox) wordBox.classList.add("is-playing");
+  if (statusEl) statusEl.textContent = type === "ayah" ? "Playing…" : "Playing word…";
+
+  if (restart || recitationAudio.ended) recitationAudio.currentTime = 0;
+
+  try {
+    await recitationAudio.play();
+  } catch (error) {
+    if (statusEl) statusEl.textContent = "Audio could not play. Check internet/audio permission.";
+    if (wordBox) wordBox.classList.remove("is-playing");
+    if (playButton) playButton.classList.remove("is-active");
+  }
+}
+
+function playWordAudio(ayah, wordIndex, box) {
+  const key = `word-1-${ayah.ayah}-${wordIndex}`;
+  startAudio({
+    src: getWordAudioUrl(ayah.ayah, wordIndex),
+    key,
+    type: "word",
+    wordBox: box,
+    restart: true
+  });
+}
+
+function playAyahAudio(ayah, playButton, statusEl) {
+  const key = `ayah-1-${ayah.ayah}`;
+  startAudio({
+    src: getAyahAudioUrl(ayah.ayah),
+    key,
+    type: "ayah",
+    playButton,
+    statusEl,
+    restart: false
+  });
+}
+
+function pauseAyahAudio(ayah, statusEl) {
+  const key = `ayah-1-${ayah.ayah}`;
+  if (activeAudioUi.key === key && !recitationAudio.paused) {
+    recitationAudio.pause();
+    if (activeAudioUi.playButton) activeAudioUi.playButton.classList.remove("is-active");
+    if (statusEl) statusEl.textContent = "Stopped — press Play to continue.";
+  }
+}
+
+recitationAudio.addEventListener("ended", () => {
+  if (activeAudioUi.statusEl) activeAudioUi.statusEl.textContent = "Finished.";
+  clearActiveAudioUi({ keepStatus: true });
+});
+
+recitationAudio.addEventListener("error", () => {
+  if (activeAudioUi.statusEl) activeAudioUi.statusEl.textContent = "Audio unavailable.";
+  clearActiveAudioUi({ keepStatus: true });
+});
+
 function applySettings() {
   document.body.classList.toggle("light", settings.theme === "light");
   document.body.classList.toggle("compact", Boolean(settings.compactMode));
@@ -545,6 +640,13 @@ function render() {
     node.querySelector(".ayah-title").textContent = ayah.arabic;
     node.querySelector(".ayah-number").textContent = `1:${ayah.ayah}`;
 
+    const playAyahButton = node.querySelector(".play-ayah");
+    const stopAyahButton = node.querySelector(".stop-ayah");
+    const audioStatus = node.querySelector(".audio-status");
+    audioStatus.textContent = AYAH_RECITER_NAME;
+    playAyahButton.addEventListener("click", () => playAyahAudio(ayah, playAyahButton, audioStatus));
+    stopAyahButton.addEventListener("click", () => pauseAyahAudio(ayah, audioStatus));
+
     const grid = node.querySelector(".word-grid");
     ayah.words.forEach((word, wordIndexZero) => {
       const wordIndex = wordIndexZero + 1;
@@ -565,6 +667,7 @@ function render() {
     const plainTamil = ayah.continuous.map((p) => p.text).join(" ");
     node.querySelector(".copy-tamil").addEventListener("click", () => copyText(plainTamil));
     node.querySelector(".translation-text").textContent = ayah.translation;
+    node.querySelector(".translation-source").textContent = TRANSLATION_SOURCE;
     node.querySelector(".copy-translation").addEventListener("click", () => copyText(ayah.translation));
 
     const notesList = node.querySelector(".notes-list");
@@ -605,7 +708,7 @@ function makeWordBox(ayah, word, wordIndex, wordBorderColor) {
   box.appendChild(arabicRow);
   box.appendChild(tamilRow);
   box.appendChild(tamilPlain);
-  box.addEventListener("click", () => openWordDialog(ayah, word, wordIndex, wordBorderColor));
+  box.addEventListener("click", () => playWordAudio(ayah, wordIndex, box));
   return box;
 }
 

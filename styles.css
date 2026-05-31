@@ -193,6 +193,38 @@ h1 {
   font-weight: 900;
 }
 
+.ayah-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.audio-button {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+.audio-button.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.audio-status {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .word-grid {
   direction: rtl;
   display: flex;
@@ -215,6 +247,11 @@ h1 {
   color: var(--text);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--word-color) 24%, transparent);
   text-align: center;
+  touch-action: manipulation;
+}
+.word-box.is-playing {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--word-color) 22%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--word-color) 40%, transparent);
+  transform: translateY(-1px);
 }
 .word-box:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--word-color) 65%, white);
@@ -235,17 +272,21 @@ body.compact .word-box {
 .arabic-row,
 .tamil-rtl-row {
   display: flex;
-  flex-direction: row-reverse;
   align-items: center;
   justify-content: center;
   gap: 1px;
   min-height: 34px;
 }
 .arabic-row {
+  flex-direction: row;
   font-family: "Noto Naskh Arabic", "Amiri", "Times New Roman", serif;
   font-size: calc(clamp(1.45rem, 7vw, 2.25rem) * var(--reader-scale));
   line-height: 1.25;
   direction: rtl;
+  unicode-bidi: isolate;
+}
+.tamil-rtl-row {
+  flex-direction: row-reverse;
 }
 .tamil-rtl-row {
   font-family: "Noto Sans Tamil", system-ui, sans-serif;
@@ -263,6 +304,20 @@ body.compact .word-box {
   text-shadow: 0 0 0.01px currentColor;
 }
 .unit.silent { opacity: 0.26; }
+
+/* Arabic must remain visually right-to-left and shaped like normal Qur'an text.
+   The Arabic units are inline spans so the word does not appear reversed or broken. */
+.arabic-row {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+.arabic-row .unit {
+  display: inline;
+  min-width: 0;
+}
 .tamil-rtl-row .unit.silent { display: none; }
 .tamil-plain {
   display: none;
@@ -323,6 +378,13 @@ body.compact .tamil-plain { display: block; }
   color: var(--text);
   font-family: "Noto Sans Tamil", system-ui, sans-serif;
   font-size: calc(1rem * var(--reader-scale));
+}
+
+.translation-source {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 .notes-list {
   margin: 0;

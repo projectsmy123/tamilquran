@@ -19,7 +19,7 @@
 
     <main class="container">
       <section class="notice">
-        <strong>Prototype v2.</strong> Tap any word box to inspect its Arabic units, Tamil units, and tajweed notes. King Fahad Tamil translation fields remain placeholders until verified text is supplied.
+        <strong>Prototype v5.</strong> Tap any word box to hear that word. Use each ayah’s play/stop buttons for Sheikh Mahmoud Khalil Al-Husary recitation. Abdul Hameed Baqavi Tamil translation appears after the continuous Tamil transliteration.
       </section>
 
       <section class="toolbar" aria-label="Display controls">
@@ -52,6 +52,12 @@
           <span class="ayah-number"></span>
         </div>
 
+        <div class="ayah-audio-controls" aria-label="Ayah audio controls">
+          <button class="audio-button play-ayah" type="button" aria-label="Play ayah">▶ Play</button>
+          <button class="audio-button stop-ayah" type="button" aria-label="Stop ayah">■ Stop</button>
+          <span class="audio-status">Sheikh Mahmoud Khalil Al-Husary</span>
+        </div>
+
         <div class="word-grid" aria-label="Arabic words with Tamil direct transliteration"></div>
 
         <div class="continuous-block">
@@ -64,10 +70,11 @@
 
         <div class="translation-block">
           <div class="section-title-row">
-            <h3>King Fahad Tamil translation</h3>
+            <h3>Abdul Hameed Baqavi Tamil translation</h3>
             <button class="copy-button copy-translation" type="button">Copy</button>
           </div>
           <p class="translation-text"></p>
+          <p class="translation-source"></p>
         </div>
 
         <div class="notes-block">
