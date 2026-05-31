@@ -1,4 +1,4 @@
-const STORAGE_KEY = "tamil-quran-fatiha-v4-settings";
+const STORAGE_KEY = "tamil-quran-fatiha-v7-mobile-settings";
 const AYAH_RECITER_NAME = "Sheikh Mahmoud Khalil Al-Husary";
 const AYAH_AUDIO_BASE = "https://everyayah.com/data/Husary_64kbps/";
 const WORD_AUDIO_BASE = "https://audio.qurancdn.com/wbw/";
@@ -482,7 +482,7 @@ const fatiha = [
 function loadSettings() {
   try {
     return {
-      theme: "dark",
+      theme: "light",
       showTranslation: true,
       showNotes: false,
       compactMode: false,
@@ -490,7 +490,7 @@ function loadSettings() {
       ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")
     };
   } catch {
-    return { theme: "dark", showTranslation: true, showNotes: false, compactMode: false, fontScale: 1 };
+    return { theme: "light", showTranslation: true, showNotes: false, compactMode: false, fontScale: 1 };
   }
 }
 
@@ -604,13 +604,18 @@ recitationAudio.addEventListener("error", () => {
 });
 
 function applySettings() {
-  document.body.classList.toggle("light", settings.theme === "light");
+  settings.theme = "light";
+  document.body.classList.add("light");
+  document.body.classList.remove("dark");
   document.body.classList.toggle("compact", Boolean(settings.compactMode));
   document.documentElement.style.setProperty("--reader-scale", String(settings.fontScale));
 
-  document.getElementById("showTranslation").checked = settings.showTranslation;
-  document.getElementById("showNotes").checked = settings.showNotes;
-  document.getElementById("compactMode").checked = settings.compactMode;
+  const showTranslation = document.getElementById("showTranslation");
+  const showNotes = document.getElementById("showNotes");
+  const compactMode = document.getElementById("compactMode");
+  if (showTranslation) showTranslation.checked = settings.showTranslation;
+  if (showNotes) showNotes.checked = settings.showNotes;
+  if (compactMode) compactMode.checked = settings.compactMode;
 
   document.querySelectorAll(".translation-block").forEach((el) => el.classList.toggle("is-hidden", !settings.showTranslation));
   document.querySelectorAll(".notes-block").forEach((el) => el.classList.toggle("is-hidden", !settings.showNotes));
@@ -619,9 +624,14 @@ function applySettings() {
 function renderAyahNav() {
   const nav = document.getElementById("ayahNav");
   nav.innerHTML = "";
-  fatiha.forEach((ayah) => {
+  fatiha.forEach((ayah, index) => {
     const a = makeEl("a", "ayah-chip", `1:${ayah.ayah}`);
     a.href = `#ayah-${ayah.ayah}`;
+    a.dataset.pageIndex = String(index);
+    a.addEventListener("click", (event) => {
+      event.preventDefault();
+      goToPage(index);
+    });
     nav.appendChild(a);
   });
 }
@@ -637,7 +647,8 @@ function render() {
     card.id = `ayah-${ayah.ayah}`;
 
     node.querySelector(".ayah-label").textContent = `Surah 1 • Ayah ${ayah.ayah}`;
-    node.querySelector(".ayah-title").textContent = ayah.arabic;
+    const ayahTitle = node.querySelector(".ayah-title");
+    if (ayahTitle) ayahTitle.textContent = ayah.arabic;
     node.querySelector(".ayah-number").textContent = `1:${ayah.ayah}`;
 
     const playAyahButton = node.querySelector(".play-ayah");
@@ -688,6 +699,8 @@ function makeWordBox(ayah, word, wordIndex, wordBorderColor) {
   const wordNumber = makeEl("div", "word-number", `Word ${wordIndex}`);
   const arabicRow = makeEl("div", "arabic-row");
   const tamilRow = makeEl("div", "tamil-rtl-row");
+  arabicRow.dir = "rtl";
+  tamilRow.dir = "rtl";
 
   word.units.forEach((unit, unitIndexZero) => {
     const unitIndex = unitIndexZero + 1;
@@ -756,29 +769,33 @@ async function copyText(text) {
 }
 
 function bindControls() {
-  document.getElementById("themeToggle").addEventListener("click", () => {
-    settings.theme = settings.theme === "light" ? "dark" : "light";
-    saveSettings();
-    applySettings();
-  });
+  const showTranslation = document.getElementById("showTranslation");
+  const showNotes = document.getElementById("showNotes");
+  const compactMode = document.getElementById("compactMode");
 
-  document.getElementById("showTranslation").addEventListener("change", (event) => {
-    settings.showTranslation = event.target.checked;
-    saveSettings();
-    applySettings();
-  });
+  if (showTranslation) {
+    showTranslation.addEventListener("change", (event) => {
+      settings.showTranslation = event.target.checked;
+      saveSettings();
+      applySettings();
+    });
+  }
 
-  document.getElementById("showNotes").addEventListener("change", (event) => {
-    settings.showNotes = event.target.checked;
-    saveSettings();
-    applySettings();
-  });
+  if (showNotes) {
+    showNotes.addEventListener("change", (event) => {
+      settings.showNotes = event.target.checked;
+      saveSettings();
+      applySettings();
+    });
+  }
 
-  document.getElementById("compactMode").addEventListener("change", (event) => {
-    settings.compactMode = event.target.checked;
-    saveSettings();
-    applySettings();
-  });
+  if (compactMode) {
+    compactMode.addEventListener("change", (event) => {
+      settings.compactMode = event.target.checked;
+      saveSettings();
+      applySettings();
+    });
+  }
 
   document.getElementById("increaseFont").addEventListener("click", () => {
     settings.fontScale = Math.min(1.4, Number((settings.fontScale + 0.08).toFixed(2)));
@@ -793,6 +810,38 @@ function bindControls() {
   });
 }
 
+function goToPage(index) {
+  const pager = document.getElementById("app");
+  const page = pager?.children[index];
+  if (!pager || !page) return;
+  pager.scrollTo({ left: page.offsetLeft, behavior: "smooth" });
+  setActivePage(index);
+}
+
+function setActivePage(index) {
+  const indicator = document.getElementById("pageIndicator");
+  if (indicator) indicator.textContent = `${index + 1} / ${fatiha.length}`;
+  document.querySelectorAll(".ayah-chip").forEach((chip, chipIndex) => {
+    chip.classList.toggle("is-active", chipIndex === index);
+  });
+}
+
+function bindPager() {
+  const pager = document.getElementById("app");
+  if (!pager) return;
+  let scrollTimer = null;
+  const update = () => {
+    const index = Math.round(pager.scrollLeft / Math.max(1, pager.clientWidth));
+    setActivePage(Math.min(Math.max(index, 0), fatiha.length - 1));
+  };
+  pager.addEventListener("scroll", () => {
+    if (scrollTimer) window.clearTimeout(scrollTimer);
+    scrollTimer = window.setTimeout(update, 80);
+  }, { passive: true });
+  setActivePage(0);
+}
+
 renderAyahNav();
 render();
 bindControls();
+bindPager();

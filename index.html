@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101010" />
+    <meta name="theme-color" content="#efe6d2" />
     <title>Tamil Qur'an Recitation Aid - Surah Al-Fatihah</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -14,25 +14,19 @@
         <h1>Surah Al-Fatihah</h1>
         <p class="subtitle">Arabic word boxes with Tamil direct recitation transliteration.</p>
       </div>
-      <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle light and dark mode">☀︎ / ☾</button>
+      
     </header>
 
     <main class="container">
-      <section class="notice">
-        <strong>Prototype v5.</strong> Tap any word box to hear that word. Use each ayah’s play/stop buttons for Sheikh Mahmoud Khalil Al-Husary recitation. Abdul Hameed Baqavi Tamil translation appears after the continuous Tamil transliteration.
-      </section>
-
-      <section class="toolbar" aria-label="Display controls">
+      <section class="mobile-controls" aria-label="Reader controls">
         <button id="decreaseFont" type="button">A−</button>
         <button id="increaseFont" type="button">A+</button>
-        <label><input id="showTranslation" type="checkbox" checked /> Translation</label>
-        <label><input id="showNotes" type="checkbox" /> Notes</label>
-        <label><input id="compactMode" type="checkbox" /> Compact</label>
+        <span id="pageIndicator" class="page-indicator">1 / 7</span>
       </section>
 
-      <nav id="ayahNav" class="ayah-nav" aria-label="Ayah navigation"></nav>
+      <div id="app" class="ayah-pager" aria-label="Swipe horizontally to move between ayahs"></div>
 
-      <div id="app"></div>
+      <nav id="ayahNav" class="ayah-nav" aria-label="Ayah navigation"></nav>
     </main>
 
     <dialog id="wordDialog" class="word-dialog">
@@ -47,7 +41,6 @@
         <div class="ayah-heading">
           <div>
             <p class="ayah-label"></p>
-            <h2 class="ayah-title"></h2>
           </div>
           <span class="ayah-number"></span>
         </div>
