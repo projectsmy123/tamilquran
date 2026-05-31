@@ -1,41 +1,30 @@
-# Tamil Qur'an Recitation Aid - Surah Al-Fatihah Prototype
+# Tamil Qur'an Recitation Aid - Surah Al-Fatihah Prototype v2
 
-This is a no-build GitHub Pages prototype for a Tamil transliteration Qur'an website.
+This is a no-build GitHub Pages prototype. Upload these files directly to the repository root:
 
-## Features in this prototype
+- `index.html`
+- `styles.css`
+- `app.js`
+- `README.md`
 
-- Mobile-first layout
-- One box per Arabic word
-- Unique box-border color per word in each ayah
-- Arabic letter/sound units colored individually
-- Tamil direct transliteration inside each word box
-- Tamil direct transliteration rendered visually right-to-left inside boxes
-- Continuous Tamil transliteration below the boxes
-- Continuous Tamil words use the same colors as their corresponding word boxes
-- Tajweed/recitation notes
-- Light/dark mode toggle
-- Translation block prepared for King Fahad Tamil translation text
+## v2 additions
 
-## Important data note
+- Tap/click any word box for a word detail dialog
+- Copy continuous Tamil transliteration per ayah
+- Copy translation per ayah
+- Font size controls for mobile reading
+- Ayah quick navigation
+- Persistent light/dark, compact mode, notes, translation, and font-size settings
+- Better word-to-continuous color mapping
 
-The King Fahad Tamil translation is not invented in this prototype. Each translation field is a placeholder until the exact approved/licensed translation text is supplied.
+## Data note
 
-The Tamil transliteration data is an editable prototype. Before publication, review the sound conventions for these Arabic letters/rules:
+King Fahad Tamil translation fields are placeholders. Replace `translation` values in `app.js` only after you have the verified approved Tamil translation text.
 
-- ص / ض / ط / ظ heavy letters
-- ع and غ
-- hamzatul-wasl behavior
-- final stop pronunciation
-- madd count display
-- qalqalah display
+## GitHub Pages settings
 
-## How to publish on GitHub Pages
+Use:
 
-1. Create a new GitHub repository.
-2. Upload `index.html`, `styles.css`, `app.js`, and `README.md` to the repository root.
-3. Open repository **Settings**.
-4. Go to **Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Select the `main` branch and `/root` folder.
-7. Save.
-8. GitHub will publish the website URL after the first Pages deployment.
+- Source: Deploy from a branch
+- Branch: `main`
+- Folder: `/root`

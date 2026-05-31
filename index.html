@@ -3,32 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101010" />
     <title>Tamil Qur'an Recitation Aid - Surah Al-Fatihah</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <div>
+      <div class="header-copy">
         <p class="eyebrow">Tamil Qur'an Recitation Aid</p>
         <h1>Surah Al-Fatihah</h1>
-        <p class="subtitle">Mobile-first word boxes with Arabic/Tamil letter color mapping.</p>
+        <p class="subtitle">Arabic word boxes with Tamil direct recitation transliteration.</p>
       </div>
-      <button id="themeToggle" class="header-button" type="button" aria-label="Toggle light and dark mode">☀︎ / ☾</button>
+      <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle light and dark mode">☀︎ / ☾</button>
     </header>
 
     <main class="container">
       <section class="notice">
-        <strong>Prototype:</strong> This page proves the word-box, letter-color, continuous-Tamil, and mobile layout system. The King Fahad Tamil translation text is intentionally left as a verified-data placeholder until the exact licensed text is supplied.
+        <strong>Prototype v2.</strong> Tap any word box to inspect its Arabic units, Tamil units, and tajweed notes. King Fahad Tamil translation fields remain placeholders until verified text is supplied.
       </section>
 
-      <section class="controls" aria-label="Display controls">
-        <label><input id="toggleTranslation" type="checkbox" checked /> Translation</label>
-        <label><input id="toggleNotes" type="checkbox" checked /> Tajweed notes</label>
-        <label><input id="compactMode" type="checkbox" /> Compact mobile boxes</label>
+      <section class="toolbar" aria-label="Display controls">
+        <button id="decreaseFont" type="button">A−</button>
+        <button id="increaseFont" type="button">A+</button>
+        <label><input id="showTranslation" type="checkbox" checked /> Translation</label>
+        <label><input id="showNotes" type="checkbox" /> Notes</label>
+        <label><input id="compactMode" type="checkbox" /> Compact</label>
       </section>
+
+      <nav id="ayahNav" class="ayah-nav" aria-label="Ayah navigation"></nav>
 
       <div id="app"></div>
     </main>
+
+    <dialog id="wordDialog" class="word-dialog">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Close">×</button>
+      </form>
+      <div id="dialogContent"></div>
+    </dialog>
 
     <template id="ayahTemplate">
       <article class="ayah-card">
@@ -39,15 +51,25 @@
           </div>
           <span class="ayah-number"></span>
         </div>
+
         <div class="word-grid" aria-label="Arabic words with Tamil direct transliteration"></div>
+
         <div class="continuous-block">
-          <h3>Continuous Tamil transliteration</h3>
+          <div class="section-title-row">
+            <h3>Continuous Tamil transliteration</h3>
+            <button class="copy-button copy-tamil" type="button">Copy</button>
+          </div>
           <p class="continuous-tamil"></p>
         </div>
+
         <div class="translation-block">
-          <h3>King Fahad Tamil translation</h3>
+          <div class="section-title-row">
+            <h3>King Fahad Tamil translation</h3>
+            <button class="copy-button copy-translation" type="button">Copy</button>
+          </div>
           <p class="translation-text"></p>
         </div>
+
         <div class="notes-block">
           <h3>Tajweed / recitation notes</h3>
           <ul class="notes-list"></ul>

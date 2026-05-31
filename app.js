@@ -1,271 +1,695 @@
-const letterPalette = [
-  "#ff6b6b", "#4dabf7", "#51cf66", "#ffd43b", "#cc5de8", "#20c997",
-  "#ff922b", "#74c0fc", "#f06595", "#94d82d", "#9775fa", "#66d9e8",
-  "#ffa8a8", "#a9e34b", "#ffc078", "#b197fc", "#63e6be", "#e599f7"
-];
+const STORAGE_KEY = "tamil-quran-fatiha-v2-settings";
 
-function wordColor(ayahNumber, wordIndex) {
-  const hue = (ayahNumber * 47 + wordIndex * 71) % 360;
-  return `hsl(${hue} 78% 58%)`;
-}
-
-function unitColor(wordIndex, unitIndex) {
-  return letterPalette[(wordIndex * 5 + unitIndex * 3) % letterPalette.length];
-}
+const settings = loadSettings();
 
 const fatiha = [
   {
     ayah: 1,
-    title: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    arabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     words: [
-      { note: "Direct: ba-sin-meem. Meem has kasra.", units: [
-        { ar: "بِ", ta: "Bி" }, { ar: "سْ", ta: "ஸ்" }, { ar: "مِ", ta: "மி" }
-      ]},
-      { note: "Connected reading: initial hamzatul-wasl is silent; read as llaahi.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "ل", ta: "ல்" }, { ar: "لّٰ", ta: "லா" }, { ar: "هِ", ta: "ஹி" }
-      ]},
-      { note: "Laam shamsiyyah merges into raa; connected sound: r-rahmaani.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "رَّ", ta: "ர்-ர" }, { ar: "حْ", ta: "ஹ்" }, { ar: "مَٰ", ta: "மா" }, { ar: "نِ", ta: "னி" }
-      ]},
-      { note: "Laam shamsiyyah merges into raa; final stop may end as raheem.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "رَّ", ta: "ர்-ர" }, { ar: "حِ", ta: "ஹி" }, { ar: "ي", ta: "ஈ" }, { ar: "مِ", ta: "மி" }
-      ]}
+      {
+        arabic: "بِسْمِ",
+        tamilBox: "Bிஸ்மி",
+        rule: "Direct word sound: ba-sin-meem. The meem carries kasra.",
+        units: [
+          { ar: "بِ", ta: "Bி", rule: "baa with kasra" },
+          { ar: "سْ", ta: "ஸ்", rule: "seen sakinah" },
+          { ar: "مِ", ta: "மி", rule: "meem with kasra" }
+        ]
+      },
+      {
+        arabic: "اللَّهِ",
+        tamilBox: "ல்லாஹி",
+        rule: "Connected reading: hamzatul-wasl is silent; the sound continues as llaahi.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent in connected reading" },
+          { ar: "ل", ta: "ல்", rule: "laam" },
+          { ar: "لّٰ", ta: "லா", rule: "shaddah + dagger alif/madd" },
+          { ar: "هِ", ta: "ஹி", rule: "haa with kasra" }
+        ]
+      },
+      {
+        arabic: "الرَّحْمَٰنِ",
+        tamilBox: "ர்-ரஹ்மானி",
+        rule: "Laam shamsiyyah: the laam merges into raa. Madd on maa sound.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "رَّ", ta: "ர்-ர", rule: "merged raa with shaddah" },
+          { ar: "حْ", ta: "ஹ்", rule: "haa/ḥaa sound approximation" },
+          { ar: "مَٰ", ta: "மா", rule: "madd tabee'i, 2 counts" },
+          { ar: "نِ", ta: "னி", rule: "noon with kasra" }
+        ]
+      },
+      {
+        arabic: "الرَّحِيمِ",
+        tamilBox: "ர்-ரஹீம்",
+        rule: "Laam shamsiyyah merges into raa. Final stop may be read as raheem.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "رَّ", ta: "ர்-ர", rule: "merged raa with shaddah" },
+          { ar: "حِ", ta: "ஹி", rule: "ḥaa with kasra" },
+          { ar: "ي", ta: "ஈ", rule: "madd sound" },
+          { ar: "مِ", ta: "ம்", rule: "final stop uses meem sound" }
+        ]
+      }
     ],
-    continuous: ["Bிஸ்மி", "ல்லாஹிர்", "ரஹ்மானிர்", "ரஹீம்"],
+    continuous: [
+      { word: 1, text: "Bிஸ்மி" },
+      { word: 2, text: "ல்லாஹி" },
+      { word: 3, text: "ர்-ரஹ்மானி" },
+      { word: 4, text: "ர்-ரஹீம்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:1 here.]",
-    notes: ["Hamzatul-wasl in اللَّهِ is not pronounced when continuing.", "الرَّحْمَٰنِ and الرَّحِيمِ use Laam Shamsiyyah/idghaam into ر.", "Final word can be stopped as ரஹீம்."]
+    notes: [
+      "اللَّهِ: hamzatul-wasl is not pronounced when continuing.",
+      "الرَّحْمَٰنِ / الرَّحِيمِ: laam shamsiyyah merges into ر.",
+      "Final stop pronunciation of الرَّحِيمِ is represented as ரஹீம்."
+    ]
   },
   {
     ayah: 2,
-    title: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
     words: [
-      { note: "Qamariyyah laam stays clear before ح.", units: [
-        { ar: "ا", ta: "அ" }, { ar: "لْ", ta: "ல்" }, { ar: "حَ", ta: "ஹ" }, { ar: "مْ", ta: "ம்" }, { ar: "دُ", ta: "து" }
-      ]},
-      { note: "Read as lillaahi.", units: [
-        { ar: "لِ", ta: "லி" }, { ar: "لّٰ", ta: "ல்லா" }, { ar: "هِ", ta: "ஹி" }
-      ]},
-      { note: "Shaddah on baa gives doubled ப/ப் sound.", units: [
-        { ar: "رَ", ta: "ர" }, { ar: "بِّ", ta: "ப்பி" }
-      ]},
-      { note: "Qamariyyah laam before ع. Continuous reading attaches the l sound after rabbi.", units: [
-        { ar: "ا", ta: "அ" }, { ar: "لْ", ta: "ல்" }, { ar: "عَٰ", ta: "ஆ" }, { ar: "لَ", ta: "ல" }, { ar: "مِ", ta: "மி" }, { ar: "ينَ", ta: "ஈன்" }
-      ]}
+      {
+        arabic: "الْحَمْدُ",
+        tamilBox: "அல்ஹமது",
+        rule: "Qamariyyah laam stays clear before ح.",
+        units: [
+          { ar: "ا", ta: "அ", rule: "initial alif/hamzah sound" },
+          { ar: "لْ", ta: "ல்", rule: "qamariyyah laam clear" },
+          { ar: "حَ", ta: "ஹ", rule: "ḥaa approximation" },
+          { ar: "مْ", ta: "ம்", rule: "meem sakinah clear" },
+          { ar: "دُ", ta: "து", rule: "daal with dammah" }
+        ]
+      },
+      {
+        arabic: "لِلَّهِ",
+        tamilBox: "லில்லாஹி",
+        rule: "Read as lillaahi with shaddah/madd on laam.",
+        units: [
+          { ar: "لِ", ta: "லி", rule: "laam with kasra" },
+          { ar: "لّٰ", ta: "ல்லா", rule: "shaddah + madd" },
+          { ar: "هِ", ta: "ஹி", rule: "haa with kasra" }
+        ]
+      },
+      {
+        arabic: "رَبِّ",
+        tamilBox: "ரப்பி",
+        rule: "Shaddah on baa gives doubled sound.",
+        units: [
+          { ar: "رَ", ta: "ர", rule: "raa with fatha" },
+          { ar: "بِّ", ta: "ப்பி", rule: "baa with shaddah + kasra" }
+        ]
+      },
+      {
+        arabic: "الْعَالَمِينَ",
+        tamilBox: "அல்-ஆலமீன்",
+        rule: "Qamariyyah laam before ع. Final stop ends as aalameen.",
+        units: [
+          { ar: "ا", ta: "அ", rule: "initial alif" },
+          { ar: "لْ", ta: "ல்", rule: "qamariyyah laam clear" },
+          { ar: "عَٰ", ta: "ஆ", rule: "ayn + madd approximation" },
+          { ar: "لَ", ta: "ல", rule: "laam with fatha" },
+          { ar: "مِ", ta: "மி", rule: "meem with kasra" },
+          { ar: "ينَ", ta: "ஈன்", rule: "long final een at stop" }
+        ]
+      }
     ],
-    continuous: ["அல்ஹம்து", "லில்லாஹி", "ரப்பில்", "ஆலமீன்"],
+    continuous: [
+      { word: 1, text: "அல்ஹமது" },
+      { word: 2, text: "லில்லாஹி" },
+      { word: 3, text: "ரப்பில்" },
+      { word: 4, text: "ஆலமீன்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:2 here.]",
-    notes: ["الْحَمْدُ keeps clear laam because ح is qamariyyah.", "رَبِّ has shaddah; Tamil box uses doubled sound.", "End of verse may stop as ஆலமீன்."]
+    notes: [
+      "الْحَمْدُ: qamariyyah laam remains clear.",
+      "رَبِّ: shaddah is shown by doubled Tamil sound.",
+      "الْعَالَمِينَ: final stop is represented as ஆலமீன்."
+    ]
   },
   {
     ayah: 3,
-    title: "الرَّحْمَٰنِ الرَّحِيمِ",
+    arabic: "الرَّحْمَٰنِ الرَّحِيمِ",
     words: [
-      { note: "Laam shamsiyyah merges into raa.", units: [
-        { ar: "ا", ta: "அ", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "رَّ", ta: "ர்-ர" }, { ar: "حْ", ta: "ஹ்" }, { ar: "مَٰ", ta: "மா" }, { ar: "نِ", ta: "னி" }
-      ]},
-      { note: "Laam shamsiyyah merges into raa.", units: [
-        { ar: "ا", ta: "அ", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "رَّ", ta: "ர்-ர" }, { ar: "حِ", ta: "ஹி" }, { ar: "ي", ta: "ஈ" }, { ar: "مِ", ta: "மி" }
-      ]}
+      {
+        arabic: "الرَّحْمَٰنِ",
+        tamilBox: "அர்-ரஹ்மானி",
+        rule: "Laam shamsiyyah merges into raa.",
+        units: [
+          { ar: "ا", ta: "அ", rule: "starting form shown when beginning" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "رَّ", ta: "ர்-ர", rule: "raa with shaddah" },
+          { ar: "حْ", ta: "ஹ்", rule: "ḥaa approximation" },
+          { ar: "مَٰ", ta: "மா", rule: "madd tabee'i" },
+          { ar: "نِ", ta: "னி", rule: "noon with kasra" }
+        ]
+      },
+      {
+        arabic: "الرَّحِيمِ",
+        tamilBox: "ர்-ரஹீம்",
+        rule: "Laam shamsiyyah merges into raa. Final stop as raheem.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent in connected reading" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "رَّ", ta: "ர்-ர", rule: "raa with shaddah" },
+          { ar: "حِ", ta: "ஹி", rule: "ḥaa with kasra" },
+          { ar: "ي", ta: "ஈ", rule: "madd sound" },
+          { ar: "مِ", ta: "ம்", rule: "final stop meem" }
+        ]
+      }
     ],
-    continuous: ["அர்-ரஹ்மானிர்", "ரஹீம்"],
+    continuous: [
+      { word: 1, text: "அர்-ரஹ்மானி" },
+      { word: 2, text: "ர்-ரஹீம்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:3 here.]",
-    notes: ["Both words contain sun-letter merging into ر.", "Final word can be stopped as ரஹீம்."]
+    notes: [
+      "Both words use laam shamsiyyah into ر.",
+      "Tamil output follows connected recitation rather than raw spelling."
+    ]
   },
   {
     ayah: 4,
-    title: "مَالِكِ يَوْمِ الدِّينِ",
+    arabic: "مَالِكِ يَوْمِ الدِّينِ",
     words: [
-      { note: "Madd tabee'i on alif: maa.", units: [
-        { ar: "مَ", ta: "ம" }, { ar: "ا", ta: "ா" }, { ar: "لِ", ta: "லி" }, { ar: "كِ", ta: "கி" }
-      ]},
-      { note: "Leen sound in yawm.", units: [
-        { ar: "يَ", ta: "ய" }, { ar: "وْ", ta: "வ்" }, { ar: "مِ", ta: "மி" }
-      ]},
-      { note: "Laam shamsiyyah merges into daal with shaddah.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "دِّ", ta: "த்-தீ" }, { ar: "ي", ta: "" }, { ar: "نِ", ta: "ன்" }
-      ]}
+      {
+        arabic: "مَالِكِ",
+        tamilBox: "மாலிகி",
+        rule: "Madd tabee'i on alif: maa.",
+        units: [
+          { ar: "مَ", ta: "ம", rule: "meem with fatha" },
+          { ar: "ا", ta: "ா", rule: "alif madd, 2 counts" },
+          { ar: "لِ", ta: "லி", rule: "laam with kasra" },
+          { ar: "كِ", ta: "கி", rule: "kaaf with kasra" }
+        ]
+      },
+      {
+        arabic: "يَوْمِ",
+        tamilBox: "யவ்மி",
+        rule: "Leen-like yawm sound.",
+        units: [
+          { ar: "يَ", ta: "ய", rule: "yaa with fatha" },
+          { ar: "وْ", ta: "வ்", rule: "waw sakinah" },
+          { ar: "مِ", ta: "மி", rule: "meem with kasra" }
+        ]
+      },
+      {
+        arabic: "الدِّينِ",
+        tamilBox: "த்-தீன்",
+        rule: "Laam shamsiyyah merges into daal with shaddah.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "دِّ", ta: "த்-தீ", rule: "daal with shaddah + long ee" },
+          { ar: "ي", ta: "", silent: true, rule: "included in தீ sound" },
+          { ar: "نِ", ta: "ன்", rule: "final stop noon" }
+        ]
+      }
     ],
-    continuous: ["மாலிகி", "யவ்மித்-தீன்"],
+    continuous: [
+      { word: 1, text: "மாலிகி" },
+      { word: 2, text: "யவ்மி" },
+      { word: 3, text: "த்-தீன்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:4 here.]",
-    notes: ["الدِّينِ uses sun-letter merging; the ل is not pronounced.", "Final stop commonly ends as தீன்."]
+    notes: [
+      "الدِّينِ: written laam is silent/merged because of shamsiyyah rule.",
+      "Final stop represented as தீன்."
+    ]
   },
   {
     ayah: 5,
-    title: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+    arabic: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
     words: [
-      { note: "Shaddah on yaa gives iyyaa.", units: [
-        { ar: "إِ", ta: "இ" }, { ar: "يَّ", ta: "ய்யா" }, { ar: "كَ", ta: "க" }
-      ]},
-      { note: "Ayn is shown with ஃ marker; baa is shown with B style.", units: [
-        { ar: "نَ", ta: "ந" }, { ar: "عْ", ta: "ஃ" }, { ar: "بُ", ta: "Bு" }, { ar: "دُ", ta: "து" }
-      ]},
-      { note: "Wa is read as வ.", units: [
-        { ar: "وَ", ta: "வ" }
-      ]},
-      { note: "Shaddah on yaa gives iyyaa.", units: [
-        { ar: "إِ", ta: "இ" }, { ar: "يَّ", ta: "ய்யா" }, { ar: "كَ", ta: "க" }
-      ]},
-      { note: "Seen + taa + ayn; final stop may end as ஈன்.", units: [
-        { ar: "نَ", ta: "ந" }, { ar: "سْ", ta: "ஸ்" }, { ar: "تَ", ta: "த" }, { ar: "عِ", ta: "ஃஇ" }, { ar: "ي", ta: "ஈ" }, { ar: "نُ", ta: "ன்" }
-      ]}
+      {
+        arabic: "إِيَّاكَ",
+        tamilBox: "இய்யாக",
+        rule: "Shaddah on yaa gives iyyaa.",
+        units: [
+          { ar: "إِ", ta: "இ", rule: "hamzah with kasra" },
+          { ar: "يَّ", ta: "ய்யா", rule: "yaa with shaddah + madd" },
+          { ar: "كَ", ta: "க", rule: "kaaf with fatha" }
+        ]
+      },
+      {
+        arabic: "نَعْبُدُ",
+        tamilBox: "நஃBுது",
+        rule: "Ayn is marked with ஃ. Baa uses B convention.",
+        units: [
+          { ar: "نَ", ta: "ந", rule: "noon with fatha" },
+          { ar: "عْ", ta: "ஃ", rule: "ayn marker" },
+          { ar: "بُ", ta: "Bு", rule: "baa with dammah" },
+          { ar: "دُ", ta: "து", rule: "daal with dammah" }
+        ]
+      },
+      {
+        arabic: "وَ",
+        tamilBox: "வ",
+        rule: "Wa is read as va/wa convention.",
+        units: [
+          { ar: "وَ", ta: "வ", rule: "waw with fatha" }
+        ]
+      },
+      {
+        arabic: "إِيَّاكَ",
+        tamilBox: "இய்யாக",
+        rule: "Repeated iyyaaka.",
+        units: [
+          { ar: "إِ", ta: "இ", rule: "hamzah with kasra" },
+          { ar: "يَّ", ta: "ய்யா", rule: "yaa with shaddah + madd" },
+          { ar: "كَ", ta: "க", rule: "kaaf with fatha" }
+        ]
+      },
+      {
+        arabic: "نَسْتَعِينُ",
+        tamilBox: "நஸ்தஈன்",
+        rule: "Final stop represented as nasta'een.",
+        units: [
+          { ar: "نَ", ta: "ந", rule: "noon with fatha" },
+          { ar: "سْ", ta: "ஸ்", rule: "seen sakinah" },
+          { ar: "تَ", ta: "த", rule: "taa with fatha" },
+          { ar: "عِ", ta: "ஃஇ", rule: "ayn with kasra marker" },
+          { ar: "ي", ta: "ஈ", rule: "long ee" },
+          { ar: "نُ", ta: "ன்", rule: "final stop noon" }
+        ]
+      }
     ],
-    continuous: ["இய்யாக", "நஃBுது", "வ", "இய்யாக", "நஸ்தஈன்"],
+    continuous: [
+      { word: 1, text: "இய்யாக" },
+      { word: 2, text: "நஃBுது" },
+      { word: 3, text: "வ" },
+      { word: 4, text: "இய்யாக" },
+      { word: 5, text: "நஸ்தஈன்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:5 here.]",
-    notes: ["إِيَّاكَ has shaddah on ي.", "ع is represented with a Tamil marker for now; this convention can be adjusted."]
+    notes: [
+      "إِيَّاكَ: shaddah on ي is represented by ய்யா.",
+      "ع uses ஃ marker as a temporary Tamil recitation convention."
+    ]
   },
   {
     ayah: 6,
-    title: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+    arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
     words: [
-      { note: "Starting hamzatul-wasl is pronounced at verse start.", units: [
-        { ar: "ا", ta: "இ" }, { ar: "هْ", ta: "ஹ்" }, { ar: "دِ", ta: "தி" }, { ar: "نَا", ta: "னா" }
-      ]},
-      { note: "Laam shamsiyyah merges into ṣaad; heavy letter needs tajweed note.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "صِّ", ta: "ஸ்-ஸி" }, { ar: "رَا", ta: "ரா" }, { ar: "طَ", ta: "த்" }
-      ]},
-      { note: "Qamariyyah laam before meem; continuous reading links as al-mustaqeem.", units: [
-        { ar: "ا", ta: "அ" }, { ar: "لْ", ta: "ல்" }, { ar: "مُ", ta: "மு" }, { ar: "سْ", ta: "ஸ்" }, { ar: "تَ", ta: "த" }, { ar: "قِ", ta: "கீ" }, { ar: "يمَ", ta: "ம்" }
-      ]}
+      {
+        arabic: "اهْدِنَا",
+        tamilBox: "இஹ்தினா",
+        rule: "Starting hamzatul-wasl is pronounced at verse start.",
+        units: [
+          { ar: "ا", ta: "இ", rule: "starting hamzatul-wasl" },
+          { ar: "هْ", ta: "ஹ்", rule: "haa sakinah" },
+          { ar: "دِ", ta: "தி", rule: "daal with kasra" },
+          { ar: "نَا", ta: "னா", rule: "noon + alif madd" }
+        ]
+      },
+      {
+        arabic: "الصِّرَاطَ",
+        tamilBox: "ஸ்-ஸிராத்",
+        rule: "Laam shamsiyyah merges into ص. Heavy ص and ط need tajweed attention.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent in connected reading" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "صِّ", ta: "ஸ்-ஸி", rule: "heavy ṣaad with shaddah" },
+          { ar: "رَا", ta: "ரா", rule: "raa + madd" },
+          { ar: "طَ", ta: "த்", rule: "heavy taa; stop approximation" }
+        ]
+      },
+      {
+        arabic: "الْمُسْتَقِيمَ",
+        tamilBox: "அல்-முஸ்தகீம்",
+        rule: "Qamariyyah laam before meem; final stop as mustaqeem.",
+        units: [
+          { ar: "ا", ta: "அ", rule: "initial alif" },
+          { ar: "لْ", ta: "ல்", rule: "qamariyyah laam clear" },
+          { ar: "مُ", ta: "மு", rule: "meem with dammah" },
+          { ar: "سْ", ta: "ஸ்", rule: "seen sakinah" },
+          { ar: "تَ", ta: "த", rule: "taa with fatha" },
+          { ar: "قِ", ta: "கீ", rule: "qaaf + long ee approximation" },
+          { ar: "يمَ", ta: "ம்", rule: "final stop meem" }
+        ]
+      }
     ],
-    continuous: ["இஹ்தினஸ்-ஸிராதல்-முஸ்தகீம்"],
+    continuous: [
+      { word: 1, text: "இஹ்தின" },
+      { word: 2, text: "ஸ்-ஸிராத" },
+      { word: 3, text: "ல்-முஸ்தகீம்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:6 here.]",
-    notes: ["الصِّرَاطَ has sun-letter merging and tafkheem on ص/ط.", "الْمُسْتَقِيمَ has qamariyyah laam before م."]
+    notes: [
+      "الصِّرَاطَ: shamsiyyah merge into ص.",
+      "ص and ط are heavy letters; color/tooltip should teach tafkheem.",
+      "الْمُسْتَقِيمَ: qamariyyah laam remains clear before م."
+    ]
   },
   {
     ayah: 7,
-    title: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+    arabic: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
     words: [
-      { note: "Heavy ṣaad; Tamil convention can be refined.", units: [
-        { ar: "صِ", ta: "ஸி" }, { ar: "رَا", ta: "ரா" }, { ar: "طَ", ta: "த்" }
-      ]},
-      { note: "Laam shamsiyyah merges into dhaal/ذ with shaddah.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "ذِّ", ta: "ல்-ல" }, { ar: "ي", ta: "தீ" }, { ar: "نَ", ta: "ன்" }
-      ]},
-      { note: "Noon before ayn: izhaar; keep clear noon.", units: [
-        { ar: "أَ", ta: "அ" }, { ar: "نْ", ta: "ன்" }, { ar: "عَ", ta: "ஃஅ" }, { ar: "مْ", ta: "ம்" }, { ar: "تَ", ta: "த" }
-      ]},
-      { note: "Ayn/haa sequence; final meem is pronounced in connected reading.", units: [
-        { ar: "عَ", ta: "அ" }, { ar: "لَيْ", ta: "லை" }, { ar: "هِ", ta: "ஹி" }, { ar: "مْ", ta: "ம்" }
-      ]},
-      { note: "Ghayn is approximated; heavy articulation should be taught by tooltip.", units: [
-        { ar: "غَ", ta: "ஃக" }, { ar: "يْ", ta: "ய்" }, { ar: "رِ", ta: "ரி" }
-      ]},
-      { note: "Qamariyyah laam before meem; daad is heavy.", units: [
-        { ar: "ا", ta: "அ" }, { ar: "لْ", ta: "ல்" }, { ar: "مَ", ta: "ம" }, { ar: "غْ", ta: "ஃக்" }, { ar: "ضُ", ta: "து" }, { ar: "و", ta: "ூ" }, { ar: "بِ", ta: "Bி" }
-      ]},
-      { note: "Repeated عليهم.", units: [
-        { ar: "عَ", ta: "அ" }, { ar: "لَيْ", ta: "லை" }, { ar: "هِ", ta: "ஹி" }, { ar: "مْ", ta: "ம்" }
-      ]},
-      { note: "Wa-laa.", units: [
-        { ar: "وَ", ta: "வ" }, { ar: "لَا", ta: "லா" }
-      ]},
-      { note: "Laam shamsiyyah merges into heavy daad; madd on long aa and final leen/long ending.", units: [
-        { ar: "ا", ta: "", silent: true }, { ar: "لْ", ta: "", silent: true }, { ar: "ضَّ", ta: "த்-தா" }, { ar: "ا", ta: "" }, { ar: "لِّ", ta: "ல்லீ" }, { ar: "ينَ", ta: "ன்" }
-      ]}
+      {
+        arabic: "صِرَاطَ",
+        tamilBox: "ஸிராத்",
+        rule: "Heavy ṣaad and taa need tafkheem attention.",
+        units: [
+          { ar: "صِ", ta: "ஸி", rule: "heavy ṣaad" },
+          { ar: "رَا", ta: "ரா", rule: "raa + alif madd" },
+          { ar: "طَ", ta: "த்", rule: "heavy taa; stop approximation" }
+        ]
+      },
+      {
+        arabic: "الَّذِينَ",
+        tamilBox: "ல்லதீன்",
+        rule: "Laam shamsiyyah merges into ذ with shaddah.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "ذِّ", ta: "ல்ல", rule: "merged dhal/thaal approximation" },
+          { ar: "ي", ta: "தீ", rule: "long ee sound" },
+          { ar: "نَ", ta: "ன்", rule: "final stop noon" }
+        ]
+      },
+      {
+        arabic: "أَنْعَمْتَ",
+        tamilBox: "அன்அம்த",
+        rule: "Noon sakinah before ع: izhaar, clear noon.",
+        units: [
+          { ar: "أَ", ta: "அ", rule: "hamzah with fatha" },
+          { ar: "نْ", ta: "ன்", rule: "izhaar before ع" },
+          { ar: "عَ", ta: "அ", rule: "ayn marker can be refined" },
+          { ar: "مْ", ta: "ம்", rule: "meem sakinah" },
+          { ar: "تَ", ta: "த", rule: "taa with fatha" }
+        ]
+      },
+      {
+        arabic: "عَلَيْهِمْ",
+        tamilBox: "அலைஹிம்",
+        rule: "Ayn + lay + him.",
+        units: [
+          { ar: "عَ", ta: "அ", rule: "ayn marker can be refined" },
+          { ar: "لَيْ", ta: "லை", rule: "leen sound" },
+          { ar: "هِ", ta: "ஹி", rule: "haa with kasra" },
+          { ar: "مْ", ta: "ம்", rule: "meem sakinah" }
+        ]
+      },
+      {
+        arabic: "غَيْرِ",
+        tamilBox: "ஃகைரி",
+        rule: "Ghayn is approximated with ஃக. Review final convention.",
+        units: [
+          { ar: "غَ", ta: "ஃக", rule: "ghayn approximation" },
+          { ar: "يْ", ta: "ய்", rule: "yaa sakinah" },
+          { ar: "رِ", ta: "ரி", rule: "raa with kasra" }
+        ]
+      },
+      {
+        arabic: "الْمَغْضُوبِ",
+        tamilBox: "அல்-மஃக்தூBி",
+        rule: "Qamariyyah laam before meem. Heavy ض needs review.",
+        units: [
+          { ar: "ا", ta: "அ", rule: "initial alif" },
+          { ar: "لْ", ta: "ல்", rule: "qamariyyah laam clear" },
+          { ar: "مَ", ta: "ம", rule: "meem with fatha" },
+          { ar: "غْ", ta: "ஃக்", rule: "ghayn sakinah approximation" },
+          { ar: "ضُ", ta: "து", rule: "heavy daad approximation" },
+          { ar: "و", ta: "ூ", rule: "long oo" },
+          { ar: "بِ", ta: "Bி", rule: "baa with kasra" }
+        ]
+      },
+      {
+        arabic: "عَلَيْهِمْ",
+        tamilBox: "அலைஹிம்",
+        rule: "Repeated alayhim.",
+        units: [
+          { ar: "عَ", ta: "அ", rule: "ayn marker can be refined" },
+          { ar: "لَيْ", ta: "லை", rule: "leen sound" },
+          { ar: "هِ", ta: "ஹி", rule: "haa with kasra" },
+          { ar: "مْ", ta: "ம்", rule: "meem sakinah" }
+        ]
+      },
+      {
+        arabic: "وَلَا",
+        tamilBox: "வலா",
+        rule: "Wa-laa.",
+        units: [
+          { ar: "وَ", ta: "வ", rule: "waw with fatha" },
+          { ar: "لَا", ta: "லா", rule: "laam + alif madd" }
+        ]
+      },
+      {
+        arabic: "الضَّالِّينَ",
+        tamilBox: "த்-தாள்லீன்",
+        rule: "Laam shamsiyyah merges into heavy ض. Long madd and final stop as daalleen.",
+        units: [
+          { ar: "ا", ta: "", silent: true, rule: "hamzatul-wasl silent" },
+          { ar: "لْ", ta: "", silent: true, rule: "laam shamsiyyah merged" },
+          { ar: "ضَّ", ta: "த்-தா", rule: "heavy daad with shaddah + madd" },
+          { ar: "ا", ta: "", silent: true, rule: "included in தா" },
+          { ar: "لِّ", ta: "ல்லீ", rule: "laam with shaddah + long ee" },
+          { ar: "ينَ", ta: "ன்", rule: "final stop noon" }
+        ]
+      }
     ],
-    continuous: ["ஸிராதல்-லதீன", "அன்அம்த", "அலைஹிம்", "ஃகைரில்", "மஃக்தூBி", "அலைஹிம்", "வலத்-தாள்லீன்"],
+    continuous: [
+      { word: 1, text: "ஸிராத" },
+      { word: 2, text: "ல்லதீன" },
+      { word: 3, text: "அன்அம்த" },
+      { word: 4, text: "அலைஹிம்" },
+      { word: 5, text: "ஃகைரி" },
+      { word: 6, text: "ல்-மஃக்தூBி" },
+      { word: 7, text: "அலைஹிம்" },
+      { word: 8, text: "வலா" },
+      { word: 9, text: "த்-தாள்லீன்" }
+    ],
     translation: "[Paste verified King Fahad Tamil translation for 1:7 here.]",
-    notes: ["This verse has several heavy letters: ص, ط, غ, ض.", "أَنْعَمْتَ has izhaar because نْ is before ع.", "الضَّالِّينَ has sun-letter merging into ض and long madd.", "Tamil phonetic choices for ص/ض/غ/ع should be reviewed before final publication."]
+    notes: [
+      "أَنْعَمْتَ: noon sakinah before ع is izhaar.",
+      "Several heavy letters occur: ص, ط, غ, ض.",
+      "الضَّالِّينَ: shamsiyyah merge into ض and long madd.",
+      "Tamil conventions for ع, غ, ص, ض, ط should be reviewed before full publication."
+    ]
   }
 ];
 
-const app = document.getElementById("app");
-const template = document.getElementById("ayahTemplate");
+function loadSettings() {
+  try {
+    return {
+      theme: "dark",
+      showTranslation: true,
+      showNotes: false,
+      compactMode: false,
+      fontScale: 1,
+      ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")
+    };
+  } catch {
+    return { theme: "dark", showTranslation: true, showNotes: false, compactMode: false, fontScale: 1 };
+  }
+}
 
-function span(text, className, style = {}) {
-  const el = document.createElement("span");
-  el.textContent = text;
+function saveSettings() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function wordColor(ayahNumber, wordIndex) {
+  const hue = (ayahNumber * 53 + wordIndex * 37) % 360;
+  return `hsl(${hue} 82% 58%)`;
+}
+
+function unitColor(unitIndex, totalUnits) {
+  const hue = (unitIndex * 137.508 + totalUnits * 19) % 360;
+  return `hsl(${hue} 88% 62%)`;
+}
+
+function makeEl(tag, className, text) {
+  const el = document.createElement(tag);
   if (className) el.className = className;
-  Object.assign(el.style, style);
+  if (text !== undefined) el.textContent = text;
   return el;
 }
 
+function applySettings() {
+  document.body.classList.toggle("light", settings.theme === "light");
+  document.body.classList.toggle("compact", Boolean(settings.compactMode));
+  document.documentElement.style.setProperty("--reader-scale", String(settings.fontScale));
+
+  document.getElementById("showTranslation").checked = settings.showTranslation;
+  document.getElementById("showNotes").checked = settings.showNotes;
+  document.getElementById("compactMode").checked = settings.compactMode;
+
+  document.querySelectorAll(".translation-block").forEach((el) => el.classList.toggle("is-hidden", !settings.showTranslation));
+  document.querySelectorAll(".notes-block").forEach((el) => el.classList.toggle("is-hidden", !settings.showNotes));
+}
+
+function renderAyahNav() {
+  const nav = document.getElementById("ayahNav");
+  nav.innerHTML = "";
+  fatiha.forEach((ayah) => {
+    const a = makeEl("a", "ayah-chip", `1:${ayah.ayah}`);
+    a.href = `#ayah-${ayah.ayah}`;
+    nav.appendChild(a);
+  });
+}
+
 function render() {
+  const app = document.getElementById("app");
+  const template = document.getElementById("ayahTemplate");
   app.innerHTML = "";
 
   fatiha.forEach((ayah) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".ayah-card");
+    card.id = `ayah-${ayah.ayah}`;
+
     node.querySelector(".ayah-label").textContent = `Surah 1 • Ayah ${ayah.ayah}`;
-    node.querySelector(".ayah-title").textContent = "Al-Fatihah";
+    node.querySelector(".ayah-title").textContent = ayah.arabic;
     node.querySelector(".ayah-number").textContent = `1:${ayah.ayah}`;
 
     const grid = node.querySelector(".word-grid");
-    ayah.words.forEach((word, wordIdx) => {
-      const wIndex = wordIdx + 1;
-      const wColor = wordColor(ayah.ayah, wIndex);
-      const box = document.createElement("section");
-      box.className = "word-box";
-      box.style.setProperty("--word-color", wColor);
-      box.title = word.note || "";
-
-      const arabicRow = document.createElement("div");
-      arabicRow.className = "arabic-row";
-      const tamilRow = document.createElement("div");
-      tamilRow.className = "tamil-rtl-row";
-
-      word.units.forEach((unit, unitIdx) => {
-        const color = unitColor(wIndex, unitIdx + 1);
-        const arSpan = span(unit.ar, `unit${unit.silent ? " silent" : ""}`, { "--unit-color": color });
-        const taSpan = span(unit.ta, `unit${unit.silent ? " silent" : ""}`, { "--unit-color": color });
-        arSpan.style.color = color;
-        taSpan.style.color = color;
-        if (unit.silent) {
-          arSpan.title = "Silent / merged in connected reading";
-          taSpan.title = "Silent / merged in connected reading";
-        }
-        arabicRow.appendChild(arSpan);
-        tamilRow.appendChild(taSpan);
-      });
-
-      const meta = document.createElement("div");
-      meta.className = "word-meta";
-      meta.textContent = `Word ${wIndex}`;
-
-      box.appendChild(arabicRow);
-      box.appendChild(tamilRow);
-      box.appendChild(meta);
+    ayah.words.forEach((word, wordIndexZero) => {
+      const wordIndex = wordIndexZero + 1;
+      const color = wordColor(ayah.ayah, wordIndex);
+      const box = makeWordBox(ayah, word, wordIndex, color);
       grid.appendChild(box);
     });
 
-    const cont = node.querySelector(".continuous-tamil");
-    ayah.continuous.forEach((text, idx) => {
-      const color = wordColor(ayah.ayah, Math.min(idx + 1, ayah.words.length));
-      const word = span(text, "cont-word");
-      word.style.setProperty("--word-color", color);
-      word.style.color = color;
-      cont.appendChild(word);
+    const continuous = node.querySelector(".continuous-tamil");
+    ayah.continuous.forEach((part) => {
+      const el = makeEl("span", "cont-word", part.text);
+      const color = wordColor(ayah.ayah, part.word);
+      el.style.setProperty("--word-color", color);
+      el.style.color = color;
+      continuous.appendChild(el);
     });
 
+    const plainTamil = ayah.continuous.map((p) => p.text).join(" ");
+    node.querySelector(".copy-tamil").addEventListener("click", () => copyText(plainTamil));
     node.querySelector(".translation-text").textContent = ayah.translation;
+    node.querySelector(".copy-translation").addEventListener("click", () => copyText(ayah.translation));
 
     const notesList = node.querySelector(".notes-list");
-    ayah.notes.forEach((note) => {
-      const li = document.createElement("li");
-      li.textContent = note;
-      notesList.appendChild(li);
-    });
+    ayah.notes.forEach((note) => notesList.appendChild(makeEl("li", "", note)));
 
     app.appendChild(node);
   });
 
-  syncControls();
+  applySettings();
 }
 
-function syncControls() {
-  const showTranslation = document.getElementById("toggleTranslation").checked;
-  const showNotes = document.getElementById("toggleNotes").checked;
-  document.querySelectorAll(".translation-block").forEach((el) => el.classList.toggle("is-hidden", !showTranslation));
-  document.querySelectorAll(".notes-block").forEach((el) => el.classList.toggle("is-hidden", !showNotes));
-  document.body.classList.toggle("compact", document.getElementById("compactMode").checked);
+function makeWordBox(ayah, word, wordIndex, wordBorderColor) {
+  const box = makeEl("button", "word-box");
+  box.type = "button";
+  box.style.setProperty("--word-color", wordBorderColor);
+  box.setAttribute("aria-label", `Word ${wordIndex}: ${word.arabic}. Tamil: ${word.tamilBox}`);
+
+  const wordNumber = makeEl("div", "word-number", `Word ${wordIndex}`);
+  const arabicRow = makeEl("div", "arabic-row");
+  const tamilRow = makeEl("div", "tamil-rtl-row");
+
+  word.units.forEach((unit, unitIndexZero) => {
+    const unitIndex = unitIndexZero + 1;
+    const unitColorValue = unitColor(unitIndex, word.units.length);
+    const arUnit = makeEl("span", `unit${unit.silent ? " silent" : ""}`, unit.ar);
+    const taUnit = makeEl("span", `unit${unit.silent ? " silent" : ""}`, unit.ta);
+    arUnit.style.color = unitColorValue;
+    taUnit.style.color = unitColorValue;
+    arUnit.title = unit.rule || "";
+    taUnit.title = unit.rule || "";
+    arabicRow.appendChild(arUnit);
+    tamilRow.appendChild(taUnit);
+  });
+
+  const tamilPlain = makeEl("div", "tamil-plain", word.tamilBox);
+
+  box.appendChild(wordNumber);
+  box.appendChild(arabicRow);
+  box.appendChild(tamilRow);
+  box.appendChild(tamilPlain);
+  box.addEventListener("click", () => openWordDialog(ayah, word, wordIndex, wordBorderColor));
+  return box;
 }
 
-["toggleTranslation", "toggleNotes", "compactMode"].forEach((id) => {
-  document.getElementById(id).addEventListener("change", syncControls);
-});
+function openWordDialog(ayah, word, wordIndex, wordBorderColor) {
+  const dialog = document.getElementById("wordDialog");
+  const content = document.getElementById("dialogContent");
+  content.innerHTML = "";
 
-document.getElementById("themeToggle").addEventListener("click", () => {
-  document.body.classList.toggle("light");
-});
+  const title = makeEl("h2", "dialog-title", `1:${ayah.ayah} • Word ${wordIndex}`);
+  const ar = makeEl("p", "dialog-arabic", word.arabic);
+  const ta = makeEl("p", "dialog-tamil", word.tamilBox);
+  ta.style.color = wordBorderColor;
+  const rule = makeEl("p", "dialog-rule", word.rule);
 
+  const table = makeEl("div", "unit-table");
+  word.units.forEach((unit, idx) => {
+    const row = makeEl("div", "unit-row");
+    const color = unitColor(idx + 1, word.units.length);
+    const arCell = makeEl("span", "unit-cell arabic-cell", unit.ar || "—");
+    const taCell = makeEl("span", "unit-cell tamil-cell", unit.ta || "silent / merged");
+    const noteCell = makeEl("span", "unit-note", unit.rule || "");
+    arCell.style.color = color;
+    taCell.style.color = color;
+    row.appendChild(arCell);
+    row.appendChild(taCell);
+    row.appendChild(noteCell);
+    table.appendChild(row);
+  });
+
+  content.append(title, ar, ta, rule, table);
+  dialog.showModal();
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+  }
+}
+
+function bindControls() {
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    settings.theme = settings.theme === "light" ? "dark" : "light";
+    saveSettings();
+    applySettings();
+  });
+
+  document.getElementById("showTranslation").addEventListener("change", (event) => {
+    settings.showTranslation = event.target.checked;
+    saveSettings();
+    applySettings();
+  });
+
+  document.getElementById("showNotes").addEventListener("change", (event) => {
+    settings.showNotes = event.target.checked;
+    saveSettings();
+    applySettings();
+  });
+
+  document.getElementById("compactMode").addEventListener("change", (event) => {
+    settings.compactMode = event.target.checked;
+    saveSettings();
+    applySettings();
+  });
+
+  document.getElementById("increaseFont").addEventListener("click", () => {
+    settings.fontScale = Math.min(1.4, Number((settings.fontScale + 0.08).toFixed(2)));
+    saveSettings();
+    applySettings();
+  });
+
+  document.getElementById("decreaseFont").addEventListener("click", () => {
+    settings.fontScale = Math.max(0.82, Number((settings.fontScale - 0.08).toFixed(2)));
+    saveSettings();
+    applySettings();
+  });
+}
+
+renderAyahNav();
 render();
+bindControls();
